@@ -13,6 +13,7 @@
     "bcrypt": "^5.0.0",
     "common-js": "^0.3.8",
     "concurrently": "^5.3.0",
+    "connect-flash": "^0.1.1",
     "connect-loki": "^1.1.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
