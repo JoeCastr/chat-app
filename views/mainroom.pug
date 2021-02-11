@@ -1,0 +1,68 @@
+doctype html
+
+head
+  title Main Room
+  style
+    include ../public/stylesheets/app.css
+
+body
+
+  header
+    h1 Public Chat Room
+
+    ul(id='account-options')
+      li #{name}
+      li
+        a(href='/logout') Logout
+
+  section(id='main-section')
+    ul(id='scrolling-chat')
+
+    p(id='name') #{name}
+
+    form(id='form' autocomplete='off')
+      input(type='text' name='message' class='input')
+      input(type='submit' name='send' class='button' value="Send")
+
+script(src="/socket.io/socket.io.js")
+script.
+
+  const socket = io();
+  const messages = document.getElementById('scrolling-chat')
+  const form = document.getElementById('form')
+  const input = document.getElementsByClassName('input')[0];
+  const username = document.querySelector('p').textContent;
+  const messageArray = document.querySelector('ul').children
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (input.value) {
+      socket.emit('chat message', username + ": " + input.value);
+      input.value = '';
+    }
+  });
+
+  socket.on('chat message', function(msg) {
+    const item = document.createElement('li');
+    const nameSpan = document.createElement('span');
+    const colonIndex = msg.indexOf(':');
+    const text = msg.slice(colonIndex + 1)
+
+    if (selectName(msg) === username) {
+      item.setAttribute('id', 'from-me')
+    }
+
+    nameSpan.textContent = selectName(msg) + ": ";
+    nameSpan.setAttribute('id', 'my-name');
+    item.textContent = text;
+    item.prepend(nameSpan);
+
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+
+  function selectName(text) {
+    let colonIndex = text.indexOf(':');
+    let namePortion = text.slice(0, colonIndex);
+    return namePortion
+  }

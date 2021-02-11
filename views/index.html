@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatroom</title>
+</head>
+<body>
+  <ul id="scrolling-chat">
+    
+  </ul>
+  <p>
+    Client1
+  </p>
+  
+  <form id='form'>
+    <input type='text' name='message' id='input'></input>
+    <input type='submit' name='send' id='send'></input>
+  </form>
+
+
+<script src="socket.io/socket.io.js"></script>
+<script>
+  const socket = io({transports: ['websocket']}); // The app works with this
+  console.log("socket has been declared and its value === " + socket) // socket object is being instiated
+
+  const messages = document.getElementById('scrolling-chat')
+  const form = document.getElementById('form')
+  const input = document.getElementById('input');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault()
+    if (input.value) {
+      socket.emit('chat message', input.value);
+      input.value = '';
+    }
+  });
+
+  socket.on('chat message', function(msg, username) {
+    console.log("socket chat message has triggered")
+    console.log("username from server emit is: " + username)
+    const item = document.createElement('li');
+    item.textContent = username + ": " + msg;
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+</script>
+</body>
+</html>
