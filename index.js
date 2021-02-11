@@ -75,7 +75,7 @@ const requiresAuthentication = (req, res, next) => {
     next();
   }
 };
-
+//test
 app.get("/", (req, res) => {
   res.redirect("/signIn")
 })
