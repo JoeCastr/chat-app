@@ -9,6 +9,12 @@ head
 
   header
     h1 Sign in to Chat App
+    - let messageTypes = Object.keys(expressFlash || {});
+      if messageTypes.length > 0
+        ul.err-msg
+          each messageType in messageTypes
+            each message in flash[messageType]
+              li.flash(class=messageType)= message
     form(action="/signIn" method="post")
       dt
         label(for="username" class="username-label") Username:

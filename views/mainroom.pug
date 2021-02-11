@@ -10,10 +10,10 @@ body
   header
     h1 Public Chat Room
 
-    ul(id='account-options')
-      li #{name}
-      li
-        a(href='/logout') Logout
+    form(action="/logout" method="post")
+      fieldset.actions
+        p.welcome Welcome, #{name}
+        button.sign-out Sign Out
 
   section(id='main-section')
     ul(id='scrolling-chat')
@@ -31,7 +31,7 @@ script.
   const messages = document.getElementById('scrolling-chat')
   const form = document.getElementById('form')
   const input = document.getElementsByClassName('input')[0];
-  const username = document.querySelector('p').textContent;
+  const username = document.getElementById('name').textContent;
   const messageArray = document.querySelector('ul').children
 
   form.addEventListener('submit', function(e) {

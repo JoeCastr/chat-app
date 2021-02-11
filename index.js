@@ -2,7 +2,8 @@ const config = require("./lib/config");
 const express = require("express")
 const app = express();
 const path = require('path');
-const http = require('http').Server(app)
+const http = require('http').Server(app);
+const flash = require('express-flash');
 const session = require('express-session');
 const morgan = require('morgan');
 const PgPersistence = require('./lib/pg-persistence')
@@ -15,7 +16,6 @@ const ios = require('socket.io-express-session');
 const passport = require('passport')
 const initializePassport = require('./lib/passport-config');
 const methodOverride = require('method-override');
-const flash = require('express-flash');
 
 app.use(express.json())
 app.set('view engine', 'pug')
@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
   })
 });
 
-//app.use(flash()); // I don't have flash isntalled yet
+app.use(flash());
 app.use((req, res, next) => { // creating the local variables for the browser - assigning them to variables saved in the session 
   res.locals.username = req.session.username;
   console.log(req.session.signedIn);
@@ -59,9 +59,10 @@ app.use((req, res, next) => { // creating the local variables for the browser - 
   delete req.session.flash;
   next();
 });
-app.use((req, res, next) => { // not sure why I need store 
+
+app.use((req, res, next) => {
   res.locals.store = new PgPersistence(req.session); // creating a new PgPersistence object - has a username property - has a authenticate method
-  console.log("at app.use ( new PgPersistence(req.session) )")
+  //console.log("at app.use ( new PgPersistence(req.session) )")
   next();
 });
 
@@ -89,13 +90,16 @@ app.post("/signIn",
     let password = req.body.password
     const authenticated = await res.locals.store.authenticate(username, password)
     if (!authenticated) {
-      // res.flash("Error", "invalid credentials")
-      res.redirect("/signIn")
+      req.flash("failure")
+      res.redirect("/signIn", {
+        flash: req.flash()
+      })
     } else {
       let session = req.session;
       session.username = username;
       session.signedIn = true;
-      //req.flash("info", "Welcome!");
+      req.flash("info", "Welcome!");
+      res.locals.message = req.flash();
       res.redirect("/mainroom");
     }
   })
@@ -120,21 +124,20 @@ app.post("/register",
     let encryptedPassword = await res.locals.store.encryptDbPassword(password);
     let registered = await res.locals.store.register(username, encryptedPassword);
     if (registered) {
-      res.redirect("/mainroom")
+      res.redirect("/signIn")
     } else {
       res.send("Error")
     }
   })
 )
 
-// create a user
-// app.get("/login/create_user", async(req, res) => {
-//   const username = req.params.username
 
-//   res.json(username)
-// })
 
-// sign in user
+app.post("/logout", (req, res) => {
+  delete req.session.username;
+  delete req.session.signedIn;
+  res.redirect("/");
+});
 
 http.listen(5000, () => {
   console.log("server has started on port 5000")
