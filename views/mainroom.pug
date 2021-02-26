@@ -10,21 +10,31 @@ body
   header
     h1 Public Chat Room
 
-    form(action="/logout" method="post")
-      fieldset.actions
-        p.welcome Welcome, #{name}
-        button.sign-out Sign Out
+    form(action="/logout" id="account-options" method="post")
+      p.welcome Welcome, #{name}
+      button.sign-out Sign Out
 
   section(id='main-section')
     ul(id='scrolling-chat')
 
     p(id='name') #{name}
+    div(id='react-online-counter')
 
     form(id='form' autocomplete='off')
       input(type='text' name='message' class='input')
       input(type='submit' name='send' class='button' value="Send")
 
+    div(id='root')
+
+script(src="https://unpkg.com/react@17/umd/react.development.js" crossorigin)
+script(src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin)
+
+script(src="./lib/react-online-counter.js")
+
 script(src="/socket.io/socket.io.js")
+script
+  :babel
+    console.log("Hello World from Babel!");
 script.
 
   const socket = io();

@@ -16,6 +16,9 @@ const ios = require('socket.io-express-session');
 const passport = require('passport')
 const initializePassport = require('./lib/passport-config');
 const methodOverride = require('method-override');
+require("@babel/core").transform("code", {
+  presets: ["@babel/preset-env"],
+});
 
 app.use(express.json())
 app.set('view engine', 'pug')
@@ -38,7 +41,11 @@ app.use(session({
                             // the default "MemoryStore" is not secure
 }));
 
+const onlineCount = [];
+
 io.on('connection', (socket) => {
+  onlineCount.push(1)
+
   console.log('a user connected');
 
   socket.on('chat message', (msg) => {
@@ -47,6 +54,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('user disconnected')
+    onlineCount.shift();
   })
 });
 
@@ -109,7 +117,9 @@ app.get("/mainroom",
   requiresAuthentication, 
   (req, res) => {
     const username = req.session.username
-    res.render("mainroom", { name: username })
+    res.render("mainroom", { 
+      name: username
+    })
   }
 )
 
@@ -142,3 +152,5 @@ app.post("/logout", (req, res) => {
 http.listen(5000, () => {
   console.log("server has started on port 5000")
 })
+
+module.exports = onlineCount;
