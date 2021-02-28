@@ -37,7 +37,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   secret: config.SECRET,
-  // store: new LokiStore({}), // the session store has to be secure - according to the express-session docs
+  store: new LokiStore({}), // the session store has to be secure - according to the express-session docs
                             // the default "MemoryStore" is not secure
 }));
 
