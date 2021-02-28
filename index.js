@@ -20,6 +20,10 @@ const ios = require('socket.io-express-session');
 //   presets: ["@babel/preset-env"],
 // });
 
+const options = {
+  path: './loki-session-store.json'
+}
+
 app.use(express.json())
 app.set('view engine', 'pug')
 app.use(express.static("public"));
@@ -37,7 +41,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   secret: config.SECRET,
-  store: new LokiStore({}), // the session store has to be secure - according to the express-session docs
+  store: new LokiStore(options), // the session store has to be secure - according to the express-session docs
                             // the default "MemoryStore" is not secure
 }));
 
