@@ -15,12 +15,10 @@ const catchError = require("./lib/catch-error");
 const io = require('socket.io')(http);
 const LokiStore = require('connect-loki')(session);
 const ios = require('socket.io-express-session');
-const passport = require('passport')
-const initializePassport = require('./lib/passport-config');
-const methodOverride = require('method-override');
-require("@babel/core").transform("code", {
-  presets: ["@babel/preset-env"],
-});
+// const methodOverride = require('method-override');
+// require("@babel/core").transform("code", {
+//   presets: ["@babel/preset-env"],
+// });
 
 app.use(express.json())
 app.set('view engine', 'pug')
