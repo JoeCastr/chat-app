@@ -6,6 +6,8 @@ const http = require('http').Server(app);
 const flash = require('express-flash');
 const session = require('express-session');
 const morgan = require('morgan');
+const host = process.env.HOST;
+const port = process.env.PORT;
 const PgPersistence = require('./lib/pg-persistence')
 const { body,validationResult } = require('express-validator');
 const jsStringify = require('js-stringify');
@@ -149,8 +151,8 @@ app.post("/logout", (req, res) => {
   res.redirect("/");
 });
 
-http.listen(5000, () => {
-  console.log("server has started on port 5000")
+http.listen(port, () => {
+  console.log("server has started on port " + port);
 })
 
 module.exports = onlineCount;
