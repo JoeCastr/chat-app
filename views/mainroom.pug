@@ -23,9 +23,9 @@ body
       input(type='text' name='message' class='input')
       input(type='submit' name='send' class='button' value="Send")
 
+    div(id='count-users')
+      p(id='number')
     div(id='root')
-
-script(src="./lib/react-online-counter.js")
 
 script(src="/socket.io/socket.io.js")
 script.
@@ -44,6 +44,12 @@ script.
       input.value = '';
     }
   });
+
+  socket.on('count-users', (count) => {
+    const countUserNumber = document.getElementById('number');
+
+    countUserNumber.textContent = count;
+  })
 
   socket.on('chat message', function(msg) {
     const item = document.createElement('li');

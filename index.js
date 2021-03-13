@@ -15,10 +15,6 @@ const catchError = require("./lib/catch-error");
 const io = require('socket.io')(http);
 const LokiStore = require('connect-loki')(session);
 const ios = require('socket.io-express-session');
-// const methodOverride = require('method-override');
-// require("@babel/core").transform("code", {
-//   presets: ["@babel/preset-env"],
-// });
 
 const options = {
   path: './loki-session-store.json'
@@ -41,14 +37,15 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   secret: config.SECRET,
-  store: new LokiStore(options), // the session store has to be secure - according to the express-session docs
-                            // the default "MemoryStore" is not secure
+  store: new LokiStore(options)
 }));
 
-const onlineCount = [];
+let onlineCount = 0;
 
 io.on('connection', (socket) => {
-  onlineCount.push(1)
+  onlineCount += 1
+
+  socket.emit("count-users", onlineCount)
 
   console.log('a user connected');
 
@@ -58,7 +55,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('user disconnected')
-    onlineCount.shift();
+    onlineCount -= 1;
   })
 });
 
@@ -87,7 +84,12 @@ const requiresAuthentication = (req, res, next) => {
     next();
   }
 };
-//test
+
+// app.use((req, res, next) => {
+//   const error = new Error('Not found');
+//   next(error);
+// });
+
 app.get("/", (req, res) => {
   res.redirect("/signIn")
 })
