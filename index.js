@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(session({
   cookie: {
     httpOnly: false,
-    maxAge: 31 * 24 * 60 * 60 * 1000, // 31 days in milliseconds
+    maxAge: 0.12 * 60 * 60 * 1000, // 5 minutes (60 * 0.12 = 5) times 60 seconds * 1000 milliseconds
     path: "/",
     secure: false,
     secret: config.SECRET,
@@ -40,14 +40,16 @@ app.use(session({
   store: new LokiStore(options)
 }));
 
-let onlineCount = 0;
+let socketCount;
 
 io.on('connection', (socket) => {
-  onlineCount += 1
 
-  socket.emit("count-users", onlineCount)
+  let socketTracker = setInterval(function() {
+    socket.emit('reportUserCount', io.sockets.sockets.size);
+  }, 3000);
 
-  console.log('a user connected');
+  console.log(`${socket.id} connected`)
+  console.log(`There are ${io.sockets.sockets.size} users connected`)
 
   socket.on('chat message', (msg) => {
     io.emit('chat message', msg)
@@ -55,7 +57,9 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('user disconnected')
-    onlineCount -= 1;
+    if (socketCount <= 0) {
+      clearInterval(io.sockets.sockets.size);
+    }
   })
 });
 
@@ -71,7 +75,6 @@ app.use((req, res, next) => { // creating the local variables for the browser - 
 
 app.use((req, res, next) => {
   res.locals.store = new PgPersistence(req.session); // creating a new PgPersistence object - has a username property - has a authenticate method
-  //console.log("at app.use ( new PgPersistence(req.session) )")
   next();
 });
 
@@ -104,10 +107,7 @@ app.post("/signIn",
     let password = req.body.password
     const authenticated = await res.locals.store.authenticate(username, password)
     if (!authenticated) {
-      req.flash("failure")
-      res.redirect("/signIn", {
-        flash: req.flash()
-      })
+      res.redirect("/signIn")
     } else {
       let session = req.session;
       session.username = username;
@@ -123,6 +123,10 @@ app.get("/mainroom",
   requiresAuthentication, 
   (req, res) => {
     const username = req.session.username
+
+    // if the username doesn't exist in the redis cache
+    //// add it
+
     res.render("mainroom", { 
       name: username
     })
@@ -158,5 +162,3 @@ app.post("/logout", (req, res) => {
 http.listen(port, () => {
   console.log("server has started on port " + port);
 })
-
-module.exports = onlineCount;

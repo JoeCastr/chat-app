@@ -23,9 +23,9 @@ body
       input(type='text' name='message' class='input')
       input(type='submit' name='send' class='button' value="Send")
 
-    div(id='count-users')
-      p(id='number')
-    div(id='root')
+  div(id='count-users')
+    p Users currently online: <span id='number'></span>
+    
 
 script(src="/socket.io/socket.io.js")
 script.
@@ -45,7 +45,7 @@ script.
     }
   });
 
-  socket.on('count-users', (count) => {
+  socket.on('reportUserCount', (count) => {
     const countUserNumber = document.getElementById('number');
 
     countUserNumber.textContent = count;

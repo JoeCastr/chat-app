@@ -101,3 +101,21 @@ a:hover {
 #users-connected {
   float: right;
 }
+
+#count-users {
+  float: right;
+  margin: 7px 7px;
+}
+
+#number {
+  font-size: 20px;
+  border: 2px solid green;
+  font-weight: bold;
+  border-radius: 10px;
+  padding: 5px;
+  margin: 2px;
+}
+
+#number:empty {
+  display: none;
+}
