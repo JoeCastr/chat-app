@@ -5,6 +5,10 @@ To run, type "npm start"
 
 Change Log:
 
+3/21
+
+Testing
+
 2/11____ first commit
 Need to implement "Logout" feature
 I want to make this a website eventually. I need to figure out how to implement a postgresql database on heroku again.
