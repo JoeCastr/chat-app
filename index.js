@@ -40,8 +40,6 @@ app.use(session({
   store: new LokiStore(options)
 }));
 
-let socketCount;
-
 io.on('connection', (socket) => {
 
   let socketTracker = setInterval(function() {
@@ -82,23 +80,21 @@ app.use((req, res, next) => {
 const requiresAuthentication = (req, res, next) => {
   if (!res.locals.signedIn) {
     console.log("declaring the requiresAuthentication const")
-    res.redirect(302, "/signIn");
+    res.redirect(301, "/signIn");
   } else {
     next();
   }
 };
-
-// app.use((req, res, next) => {
-//   const error = new Error('Not found');
-//   next(error);
-// });
 
 app.get("/", (req, res) => {
   res.redirect("/signIn")
 })
 
 app.get("/signIn", (req, res) => {
-  res.render("signIn")
+  req.flash("info", "Please sign in")
+  res.render("signIn", {
+    flash: req.flash()
+  })
 })
 
 app.post("/signIn",
@@ -107,7 +103,10 @@ app.post("/signIn",
     let password = req.body.password
     const authenticated = await res.locals.store.authenticate(username, password)
     if (!authenticated) {
-      res.redirect("/signIn")
+      req.flash("error", "Incorrect credentials. Please try again")
+      res.render(300, "/signIn", {
+        flash: req.flash()
+      })
     } else {
       let session = req.session;
       session.username = username;
@@ -123,10 +122,6 @@ app.get("/mainroom",
   requiresAuthentication, 
   (req, res) => {
     const username = req.session.username
-
-    // if the username doesn't exist in the redis cache
-    //// add it
-
     res.render("mainroom", { 
       name: username
     })
@@ -146,7 +141,9 @@ app.post("/register",
     if (registered) {
       res.redirect("/signIn")
     } else {
-      res.send("Error")
+      req.flash("error", "Try a different username");
+      res.locals.message = req.flash();
+      res.redirect("register")
     }
   })
 )
