@@ -55,8 +55,10 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('user disconnected')
-    if (socketCount <= 0) {
+    if (socketCount && socketCount <= 0) {
       clearInterval(io.sockets.sockets.size);
+    } else {
+      throw new Error();
     }
   })
 });
@@ -101,12 +103,11 @@ app.post("/signIn",
   catchError(async(req, res) => {
     let username = req.body.username.trim();
     let password = req.body.password
-    const authenticated = await res.locals.store.authenticate(username, password)
+    const authenticated = await res.locals.store.authenticate(username, password) // problem with flash may be on the frontend? Check the documentation again
     if (!authenticated) {
       req.flash("error", "Incorrect credentials. Please try again")
-      res.render(300, "/signIn", {
-        flash: req.flash()
-      })
+      res.locals.message = req.flash();
+      res.render("signIn")
     } else {
       let session = req.session;
       session.username = username;
