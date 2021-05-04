@@ -6,15 +6,12 @@ const http = require('http').Server(app);
 const flash = require('express-flash');
 const session = require('express-session');
 const morgan = require('morgan');
-const host = process.env.HOST;
 const port = process.env.PORT || '5000';
 const PgPersistence = require('./lib/pg-persistence')
-const { body,validationResult } = require('express-validator');
-const jsStringify = require('js-stringify');
+const { body } = require('express-validator');
 const catchError = require("./lib/catch-error");
 const io = require('socket.io')(http);
 const LokiStore = require('connect-loki')(session);
-const ios = require('socket.io-express-session');
 
 const options = {
   path: './loki-session-store.json'
@@ -64,7 +61,8 @@ io.on('connection', (socket) => {
 });
 
 app.use(flash());
-app.use((req, res, next) => { // creating the local variables for the browser - assigning them to variables saved in the session 
+// creating the local variables for the browser - assigning them to variables saved in the session 
+app.use((req, res, next) => {
   res.locals.username = req.session.username;
   console.log(req.session.signedIn);
   res.locals.signedIn = req.session.signedIn;
@@ -74,14 +72,13 @@ app.use((req, res, next) => { // creating the local variables for the browser - 
 });
 
 app.use((req, res, next) => {
-  res.locals.store = new PgPersistence(req.session); // creating a new PgPersistence object - has a username property - has a authenticate method
+  res.locals.store = new PgPersistence(req.session);
   next();
 });
 
 // validate username
 const requiresAuthentication = (req, res, next) => {
   if (!res.locals.signedIn) {
-    console.log("declaring the requiresAuthentication const")
     res.redirect(301, "/signIn");
   } else {
     next();

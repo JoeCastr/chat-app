@@ -5,25 +5,28 @@ head
   style
       include ../public/stylesheets/app.css
 
-  body
+body(id="signin-body")
+  center-div(class="center-div")
+    header(id="signin-body-header")
+      h1 Chat App
+      h2 Real-time communication
+      - let messageTypes = Object.keys(expressFlash || {});
+        if messageTypes.length > 0
+          ul.err-msg
+            each messageType in messageTypes
+              each message in flash[messageType]
+                li.flash(class=messageType)= message
 
-  header
-    h1 Sign in to Chat App
-    - let messageTypes = Object.keys(expressFlash || {});
-      if messageTypes.length > 0
-        ul.err-msg
-          each messageType in messageTypes
-            each message in flash[messageType]
-              li.flash(class=messageType)= message
-    form(action="/signIn" method="post")
-      dt
-        label(for="username" class="username-label") Username:
-      dd
-        input(type="text" class="input" id="username" name="username")
-      dt
-        label(for="password" class="password-label") Password:
-      dd
-        input(type="password" class="input" id="password" name="password")
+    section
+      form(action="/signIn" method="post" class="signin-form")
+        dt
+          label(for="username" class="username-label") Username:
+        dd
+          input(type="text" class="input" id="username" name="username")
+        dt
+          label(for="password" class="password-label") Password:
+        dd
+          input(type="password" class="input" id="password" name="password")
 
-      input.button(type="submit" class="button" value="Login")
-    a(href='/register') Create Account
+        input.button(type="submit" class="button" value="Login")
+      a(href='/register') Create Account

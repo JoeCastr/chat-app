@@ -119,3 +119,28 @@ a:hover {
 #number:empty {
   display: none;
 }
+
+#signin-body {
+  margin: auto;
+  width: 700px;
+  text-align: center;
+}
+
+.center-div {
+  height: auto;
+  display: inline-block;
+  margin: auto;
+}
+
+#signin-body-header {
+  margin-bottom: 15px;
+}
+
+#mainroom-body {
+  max-width: 900px;
+  margin: auto;
+}
+
+.signin-form {
+  text-align: left;
+}
