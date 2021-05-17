@@ -12,6 +12,7 @@ const { body } = require('express-validator');
 const catchError = require("./lib/catch-error");
 const io = require('socket.io')(http);
 const LokiStore = require('connect-loki')(session);
+const redisClient = require('./lib/redis/redis');
 
 const options = {
   path: './loki-session-store.json'
@@ -37,26 +38,34 @@ app.use(session({
   store: new LokiStore(options)
 }));
 
+function sendMessage(socket) {
+  redisClient.lrange("messages", "0", "-1", (err, data) => {
+    data.forEach(message => {
+      socket.emit('chat message', message);
+    })
+  })
+}
+
 io.on('connection', (socket) => {
 
+  sendMessage(socket);
+
   let socketTracker = setInterval(function() {
-    socket.emit('reportUserCount', io.sockets.sockets.size);
+    socket.emit('reportUserCount', io.of('/').sockets.size);
   }, 3000);
 
   console.log(`${socket.id} connected`)
-  console.log(`There are ${io.sockets.sockets.size} users connected`)
+  console.log(`There are ${io.of('/').sockets.size} users connected`)
 
   socket.on('chat message', (msg) => {
+    redisClient.rpush("messages", `${msg}`);
+
     io.emit('chat message', msg)
   });
 
   socket.on('disconnect', () => {
-    console.log('user disconnected')
-    if (socketCount && socketCount <= 0) {
-      clearInterval(io.sockets.sockets.size);
-    } else {
-      throw new Error();
-    }
+    console.log('user disconnected'); 
+    clearInterval(socketTracker);
   })
 });
 
@@ -116,6 +125,8 @@ app.post("/signIn",
   })
 );
 
+// TODO: redis client retrieve messages
+// // send in 2nd argument of res.render()
 app.get("/mainroom", 
   requiresAuthentication, 
   (req, res) => {
