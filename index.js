@@ -12,7 +12,7 @@ const { body } = require('express-validator');
 const catchError = require("./lib/catch-error");
 const io = require('socket.io')(http);
 const LokiStore = require('connect-loki')(session);
-const redisClient = require('./lib/redis/redis');
+const redisClient = require('./lib/redis/redis.js');
 
 const options = {
   path: './loki-session-store.json'
