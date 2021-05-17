@@ -144,3 +144,11 @@ a:hover {
 .signin-form {
   text-align: left;
 }
+
+.demo-account-p {
+  visibility: hidden;
+}
+
+#demo-account-link:hover ~ .demo-account-p {
+  visibility: visible;
+}
