@@ -33,6 +33,19 @@ body(id="signin-body")
 
     br
     div
-      a(href='#' id="demo-account-link") Demo Account
-      p(class="demo-account-p") Username: joe
-      p(class="demo-account-p") Password: Password1
+      button(id="demo-account-link" onclick="autofillDemoCreds()") Use Demo Account
+
+script.
+
+  console.log('connected!')
+
+  function autofillDemoCreds() {
+    let demoUsername = "joe";
+    let demoPassword = "Password1";
+
+    let usernameField = document.getElementById("username");
+    let passwordField = document.getElementById("password");
+
+    usernameField.value = demoUsername;
+    passwordField.value = demoPassword;
+  }
