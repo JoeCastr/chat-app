@@ -5,21 +5,23 @@ head
   style
       include ../public/stylesheets/app.css
 
-  header
-    h1 Register a Username
-    - if (messages.error)
-      .message.error
-        span= messages.info
+body(id="signin-body")
+  center-div(class="center-div")
+    header
+      h1 Register a Username
 
-    form(action="/register" method="post")
-      dt
-        label(for="username" class="username-label") Create Username:
-      dd
-        input(type="text" class="input" id="username" name="username")
-      dt
-        label(for="password" class="password-label") Create Password:
-      dd
-        input(type="password" class="input" id="password" name="password")
+      form(action="/register" method="post" class="signin-form")
+        dt
+          label(for="username" class="username-label") Create Username:
+        dd
+          input(type="text" class="input" id="username" name="username")
+        dt
+          label(for="password" class="password-label") Create Password:
+        dd
+          input(type="password" class="input" id="password" name="password")
 
-      input.button(type="submit" class="button" value="Create User")
-    a(href='/signin') Login Page
+        input.button(type="submit" class="button" value="Create User")
+
+    br
+    div(class="links")
+      a(href='/signin') Login Page

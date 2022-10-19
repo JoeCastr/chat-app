@@ -9,13 +9,7 @@ body(id="signin-body")
   center-div(class="center-div")
     header(id="signin-body-header")
       h1 Chat App
-      h2 Real-time communication
-      - let messageTypes = Object.keys(expressFlash || {});
-        if messageTypes.length > 0
-          ul.err-msg
-            each messageType in messageTypes
-              each message in flash[messageType]
-                li.flash(class=messageType)= message
+      h2 Real-time communication 
 
     section
       form(action="/signIn" method="post" class="signin-form")
@@ -29,11 +23,17 @@ body(id="signin-body")
           input(type="password" class="input" id="password" name="password")
 
         input.button(type="submit" class="button" value="Login")
-      a(href='/register') Create Account
+        
 
     br
     div
       button(id="demo-account-link" onclick="autofillDemoCreds()") Use Demo Account
+
+    br
+    div(class="links")
+      a(href='/register') Create New Account
+
+    
 
 script.
 

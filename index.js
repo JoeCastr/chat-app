@@ -1,25 +1,24 @@
 const config = require("./lib/config");
-const express = require("express")
+const express = require("express");
 const app = express();
-const path = require('path');
-const http = require('http').Server(app);
-const flash = require('express-flash');
-const session = require('express-session');
-const morgan = require('morgan');
-const port = process.env.PORT || '5000';
-const PgPersistence = require('./lib/pg-persistence')
-const { body } = require('express-validator');
+const path = require("path");
+const http = require("http").Server(app);
+const session = require("express-session");
+const morgan = require("morgan");
+const port = process.env.PORT || "5000";
+const PgPersistence = require("./lib/pg-persistence");
+const { body } = require("express-validator");
 const catchError = require("./lib/catch-error");
-const io = require('socket.io')(http);
-const LokiStore = require('connect-loki')(session);
-const redisClient = require('./lib/redis/redis.js');
+const io = require("socket.io")(http);
+const LokiStore = require("connect-loki")(session);
+const redisClient = require("./lib/redis/redis.js");
 
 const options = {
-  path: './loki-session-store.json'
+  path: "./loki-session-store.json"
 }
 
-app.use(express.json())
-app.set('view engine', 'pug')
+app.use(express.json());
+app.set("view engine", "pug");
 app.use(express.static("public"));
 app.use(morgan("common"));
 app.use(express.urlencoded({ extended: false }));
@@ -38,45 +37,45 @@ app.use(session({
   store: new LokiStore(options)
 }));
 
+// define function to iterate through all elements of the redis range
+// // for each element, emit that element to all listening websocket clients
 function sendMessage(socket) {
   redisClient.lrange("messages", "0", "-1", (err, data) => {
     data.forEach(message => {
       socket.emit('chat message', message);
-    })
-  })
+    });
+  });
 }
 
-io.on('connection', (socket) => {
+// listen to the 'connection' event of a client, which comes from the front end
+io.on("connection", (socket) => {
 
   sendMessage(socket);
 
   let socketTracker = setInterval(function() {
-    socket.emit('reportUserCount', io.of('/').sockets.size);
+    socket.emit("reportUserCount", io.of('/').sockets.size);
   }, 3000);
 
-  console.log(`${socket.id} connected`)
-  console.log(`There are ${io.of('/').sockets.size} users connected`)
+  console.log(`${socket.id} connected`);
+  console.log(`There are ${io.of('/').sockets.size} users connected`);
 
-  socket.on('chat message', (msg) => {
+// add message to the redis list
+// emit message event to all listening clients
+  socket.on("chat message", (msg) => {
     redisClient.rpush("messages", `${msg}`);
 
-    io.emit('chat message', msg)
+    io.emit("chat message", msg);
   });
 
-  socket.on('disconnect', () => {
-    console.log('user disconnected'); 
+  socket.on("disconnect", () => {
+    console.log("user disconnected"); 
     clearInterval(socketTracker);
-  })
+  });
 });
 
-app.use(flash());
-// creating the local variables for the browser - assigning them to variables saved in the session 
 app.use((req, res, next) => {
   res.locals.username = req.session.username;
-  console.log(req.session.signedIn);
   res.locals.signedIn = req.session.signedIn;
-  res.locals.flash = req.session.flash;
-  delete req.session.flash;
   next();
 });
 
@@ -95,69 +94,56 @@ const requiresAuthentication = (req, res, next) => {
 };
 
 app.get("/", (req, res) => {
-  res.redirect("/signIn")
-})
+  res.redirect("/signIn");
+});
 
 app.get("/signIn", (req, res) => {
-  req.flash("info", "Please sign in")
-  res.render("signIn", {
-    flash: req.flash()
-  })
-})
+  res.render("signIn");
+});
 
 app.post("/signIn",
   catchError(async(req, res) => {
     let username = req.body.username.trim();
-    let password = req.body.password
-    const authenticated = await res.locals.store.authenticate(username, password) // problem with flash may be on the frontend? Check the documentation again
+    let password = req.body.password;
+    const authenticated = await res.locals.store.authenticate(username, password);
     if (!authenticated) {
-      req.flash("error", "Incorrect credentials. Please try again")
-      res.locals.message = req.flash();
-      res.render("signIn")
+      res.render("signIn");
     } else {
       let session = req.session;
       session.username = username;
       session.signedIn = true;
-      req.flash("info", "Welcome!");
-      res.locals.message = req.flash();
       res.redirect("/mainroom");
     }
   })
 );
 
-// TODO: redis client retrieve messages
-// // send in 2nd argument of res.render()
 app.get("/mainroom", 
   requiresAuthentication, 
   (req, res) => {
-    const username = req.session.username
+    const username = req.session.username;
     res.render("mainroom", { 
       name: username
-    })
+    });
   }
-)
+);
 
 app.get("/register", (req, res) => {
   res.render("register");
-})
+});
 
 app.post("/register",
   catchError(async(req, res) => {
     let username = req.body.username.trim();
-    let password = req.body.password
+    let password = req.body.password;
     let encryptedPassword = await res.locals.store.encryptDbPassword(password);
     let registered = await res.locals.store.register(username, encryptedPassword);
     if (registered) {
-      res.redirect("/signIn")
+      res.redirect("/signIn");
     } else {
-      req.flash("error", "Try a different username");
-      res.locals.message = req.flash();
-      res.redirect("register")
+      res.redirect("register");
     }
   })
-)
-
-
+);
 
 app.post("/logout", (req, res) => {
   delete req.session.username;
